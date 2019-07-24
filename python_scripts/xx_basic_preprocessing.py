@@ -24,7 +24,6 @@
 # * combine different preprocessing on different type of data;
 # * evaluate the performance of a model via cross-validation.
 #
-
 # %% [markdown]
 # ## Introduce the dataset
 #
@@ -33,35 +32,39 @@
 # such as age, experience, education, family information, etc.
 #
 # Let's first load the data located in the `datasets` folder.
-#
-# import os
-# import time
-# import pandas as pd
-#
-# df = pd.read_csv(os.path.join('datasets', 'cps_85_wages.csv'))
+
+# %% {"deletable": true, "editable": true}
+import os
+import time
+import pandas as pd
+
+df = pd.read_csv(os.path.join('datasets', 'cps_85_wages.csv'))
 
 # %% [markdown]
 # We can quickly have a look at the head of the dataframe to check the type
 # of available data.
-#
-# print(df.head())
+
+# %% {"deletable": true, "editable": true}
+print(df.head())
 
 # %% [markdown]
 # The target in our study will be the "WAGE" columns while we will use the
 # other columns to fit a model
-#
-# target_name = "WAGE"
-# target = df[target_name].to_numpy()
-# data = df.drop(columns=target_name)
+
+# %% {"deletable": true, "editable": true}
+target_name = "WAGE"
+target = df[target_name].to_numpy()
+data = df.drop(columns=target_name)
 
 # %% [markdown]
 # We can check the number of samples and the number of features available in
 # the dataset
-#
-# print(
-#     f"The dataset contains {data.shape[0]} samples and {data.shape[1]} "
-#     "features"
-# )
+
+# %% {"deletable": true, "editable": true}
+print(
+    f"The dataset contains {data.shape[0]} samples and {data.shape[1]} "
+    "features"
+)
 
 # %% [markdown]
 # ## Work with numerical data
@@ -70,16 +73,18 @@
 # directly be used in machine learning are known as numerical data. We can
 # quickly have a look at such data by selecting the subset of columns from
 # the original data.
-#
-# print(data.columns)
-# numerical_columns = ['AGE', 'EDUCATION', 'EXPERIENCE']
+
+# %% {"deletable": true, "editable": true}
+print(data.columns)
+numerical_columns = ['AGE', 'EDUCATION', 'EXPERIENCE']
 
 # %% [markdown]
 # We will use this subset of data to fit linear regressor to infer the wage
-#
-# data_numeric = data[numerical_columns]
 
-# %%
+# %% {"deletable": true, "editable": true}
+data_numeric = data[numerical_columns]
+
+# %% [markdown]
 # When building a machine learning model, it is important to leave out a
 # subset of the data which we can use later to evaluate the trained model.
 # The data used to fit a model a called training data while the one used to
@@ -89,6 +94,7 @@
 # split the dataset into a training and a testing set. It will ensure that
 # the data are shuffled before splitting the data.
 
+# %% {"deletable": true, "editable": true}
 from sklearn.model_selection import train_test_split
 
 data_train, data_test, target_train, target_test = train_test_split(
