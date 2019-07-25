@@ -110,7 +110,16 @@ print(
     f"{data_test.shape[1]} features"
 )
 
-# %%
+# %% [markdown]
+# We will build a Support Vector Machine (SVM) which is a linear model. The
+# `fit` method is called to train the data and only the training data should
+# be given for this purpose.
+# To evaluate our model, we can use the method `score`. It will compute the
+# coefficient of determination R2 when dealing with a regression problem.
+#
+# In addition, we checking the time required to train the model and internally
+# check the number of iterations done by the solver to find a solution.
+# %% {"deletable": true, "editable": true}
 from sklearn.svm import LinearSVR
 
 model = LinearSVR()
@@ -123,7 +132,14 @@ print(
     f"{elapsed_time:.3f} seconds in {model.n_iter_} iterations"
 )
 
-# %%
+# %% [markdown]
+# We should not the `ConvergenceWarning` which inform us that our model stopped
+# learning since it reaches the maximum number of iterations allowed by the
+# user. This could potentially be detrimental for the model accuracy. We can
+# follow the (bad) advice given in the warning message and increase the maximum
+# number of iterations allowed.
+
+# %% {"deletable": true, "editable": true}
 model = LinearSVR(max_iter=50000)
 start = time.time()
 model.fit(data_train, target_train)
@@ -134,7 +150,20 @@ print(
     f"{elapsed_time:.3f} seconds in {model.n_iter_} iterations"
 )
 
-# %%
+# %% [markdown]
+# We can observe an increase in performance add the cost of a longer training.
+# Instead of increasing the number of iterations, we could instead know a bit
+# more about the SVR model and known that it is expecting input data to be
+# scaled before to start training. A range of preprocessing algorithms in
+# scikit-learn allows to transform the input data before to train a model.
+# We can easily combine these sequential operation with a scikit-learn
+# `Pipeline` which will chain the operations and can be used as any other
+# classifier or regressor. The helper function `make_pipeline` will create
+# a `Pipeline` by giving the successive transformations to perform.
+#
+# In our case, we will standardize the data and then train a linear SVR.
+
+# %% {"deletable": true, "editable": true}
 from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import make_pipeline
 
@@ -147,6 +176,10 @@ print(
     f"{model.score(data_test, target_test):.2f} with a fitting time of "
     f"{elapsed_time:.3f} seconds in {model[-1].n_iter_} iterations"
 )
+
+# %% [markdown]
+# We can see that the training time and the number of iterations is much
+# shorter while the accuracy is equivalent.
 
 # %%
 from sklearn.model_selection import cross_val_score
