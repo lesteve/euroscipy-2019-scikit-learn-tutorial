@@ -23,7 +23,6 @@ In this lecture note, we will aim at introducing:
 * combine different preprocessing on different type of data;
 * evaluate the performance of a model via cross-validation.
 
-
 ## Introduce the dataset
 
 To this aim, we will use data from the 1985 "Current Population Survey"
@@ -32,7 +31,7 @@ such as age, experience, education, family information, etc.
 
 Let's first load the data located in the `datasets` folder.
 
-```python deletable=true editable=true
+```python
 import os
 import time
 import pandas as pd
@@ -43,14 +42,14 @@ df = pd.read_csv(os.path.join('datasets', 'cps_85_wages.csv'))
 We can quickly have a look at the head of the dataframe to check the type
 of available data.
 
-```python deletable=true editable=true
+```python
 print(df.head())
 ```
 
 The target in our study will be the "WAGE" columns while we will use the
 other columns to fit a model
 
-```python deletable=true editable=true
+```python
 target_name = "WAGE"
 target = df[target_name].to_numpy()
 data = df.drop(columns=target_name)
@@ -59,7 +58,7 @@ data = df.drop(columns=target_name)
 We can check the number of samples and the number of features available in
 the dataset
 
-```python deletable=true editable=true
+```python
 print(
     f"The dataset contains {data.shape[0]} samples and {data.shape[1]} "
     "features"
@@ -73,14 +72,14 @@ directly be used in machine learning are known as numerical data. We can
 quickly have a look at such data by selecting the subset of columns from
 the original data.
 
-```python deletable=true editable=true
+```python
 print(data.columns)
 numerical_columns = ['AGE', 'EDUCATION', 'EXPERIENCE']
 ```
 
 We will use this subset of data to fit linear regressor to infer the wage
 
-```python deletable=true editable=true
+```python
 data_numeric = data[numerical_columns]
 ```
 
@@ -93,7 +92,7 @@ Scikit-learn provides an helper function `train_test_split` which will
 split the dataset into a training and a testing set. It will ensure that
 the data are shuffled before splitting the data.
 
-```python deletable=true editable=true
+```python
 from sklearn.model_selection import train_test_split
 
 data_train, data_test, target_train, target_test = train_test_split(
@@ -118,7 +117,7 @@ coefficient of determination R2 when dealing with a regression problem.
 
 In addition, we checking the time required to train the model and internally
 check the number of iterations done by the solver to find a solution.
-```python deletable=true editable=true
+```python
 from sklearn.svm import LinearSVR
 
 model = LinearSVR()
@@ -138,7 +137,7 @@ user. This could potentially be detrimental for the model accuracy. We can
 follow the (bad) advice given in the warning message and increase the maximum
 number of iterations allowed.
 
-```python deletable=true editable=true
+```python
 model = LinearSVR(max_iter=50000)
 start = time.time()
 model.fit(data_train, target_train)
@@ -162,7 +161,7 @@ a `Pipeline` by giving the successive transformations to perform.
 
 In our case, we will standardize the data and then train a linear SVR.
 
-```python deletable=true editable=true
+```python
 from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import make_pipeline
 
@@ -196,7 +195,7 @@ giving the model, the data and the target. Since there is several
 cross-validation strategies, `cross_val_score` takes a parameter `cv` which
 defines the splitting strategy.
 
-```python deletable=true editable=true
+```python
 from sklearn.model_selection import cross_val_score
 
 score = cross_val_score(model, data_numeric, target, cv=5)
@@ -227,7 +226,7 @@ In the remainder of this section, we will present different strategies to
 encode categorical data into numerical data which can be used by a
 machine-learning algorithm.
 
-```python deletable=true editable=true
+```python
 categorical_columns = [
     'SOUTH', 'SEX', 'UNION', 'RACE', 'OCCUPATION', 'SECTOR', 'MARR'
 ]
@@ -240,7 +239,7 @@ print(data_categorical.head())
 The most intuitive strategy is to encode each category by a numerical value.
 The `OrdinalEncoder` will transform the data in such manner.
 
-```python deletable=true editable=true
+```python
 from sklearn.preprocessing import OrdinalEncoder
 
 print(data_categorical.head())
@@ -270,7 +269,7 @@ feature, it will create as many new columns as categories. For a sample,
 the column corresponding to the category will be set to `1` while the other
 columns will be set to `0`.
 
-```python deletable=true editable=true
+```python
 from sklearn.preprocessing import OneHotEncoder
 
 print(data_categorical.head())
@@ -290,7 +289,7 @@ pipeline as in the case with numerical data. In the following, we train a
 linear classifier on the encoded data and check the performance of this
 machine learning pipeline using cross-validation.
 
-```python deletable=true editable=true
+```python
 model = make_pipeline(OneHotEncoder(handle_unknown='ignore'), LinearSVR())
 score = cross_val_score(model, data_categorical, target)
 print(f"The R2 score is: {score.mean():.2f} +/- {score.std():.2f}")
@@ -318,7 +317,7 @@ We can first define the columns depending on their data type:
 * scaling: it will corresponds to the numerical features which will be
   standardized.
 
-```python deletable=true editable=true
+```python
 binary_encoding_columns = ['MARR', 'SEX', 'SOUTH', 'UNION']
 one_hot_encoding_columns = ['OCCUPATION', 'SECTOR', 'RACE']
 scaling_columns = ['AGE', 'EDUCATION', 'EXPERIENCE']
@@ -329,7 +328,7 @@ We can now create our `ColumnTransfomer` by specifying a list of triplet
 "preprocessor" in a machine learning pipeline by adding a machine learning
 model (e.g. a linear model) after the preprocessing.
 
-```python deletable=true editable=true
+```python
 from sklearn.compose import ColumnTransformer
 from sklearn.linear_model import RidgeCV
 

@@ -23,7 +23,6 @@
 # * the way to encode categorical variables;
 # * combine different preprocessing on different type of data;
 # * evaluate the performance of a model via cross-validation.
-#
 # %% [markdown]
 # ## Introduce the dataset
 #
@@ -33,7 +32,7 @@
 #
 # Let's first load the data located in the `datasets` folder.
 
-# %% {"deletable": true, "editable": true}
+# %%
 import os
 import time
 import pandas as pd
@@ -44,14 +43,14 @@ df = pd.read_csv(os.path.join('datasets', 'cps_85_wages.csv'))
 # We can quickly have a look at the head of the dataframe to check the type
 # of available data.
 
-# %% {"deletable": true, "editable": true}
+# %%
 print(df.head())
 
 # %% [markdown]
 # The target in our study will be the "WAGE" columns while we will use the
 # other columns to fit a model
 
-# %% {"deletable": true, "editable": true}
+# %%
 target_name = "WAGE"
 target = df[target_name].to_numpy()
 data = df.drop(columns=target_name)
@@ -60,7 +59,7 @@ data = df.drop(columns=target_name)
 # We can check the number of samples and the number of features available in
 # the dataset
 
-# %% {"deletable": true, "editable": true}
+# %%
 print(
     f"The dataset contains {data.shape[0]} samples and {data.shape[1]} "
     "features"
@@ -74,14 +73,14 @@ print(
 # quickly have a look at such data by selecting the subset of columns from
 # the original data.
 
-# %% {"deletable": true, "editable": true}
+# %%
 print(data.columns)
 numerical_columns = ['AGE', 'EDUCATION', 'EXPERIENCE']
 
 # %% [markdown]
 # We will use this subset of data to fit linear regressor to infer the wage
 
-# %% {"deletable": true, "editable": true}
+# %%
 data_numeric = data[numerical_columns]
 
 # %% [markdown]
@@ -94,7 +93,7 @@ data_numeric = data[numerical_columns]
 # split the dataset into a training and a testing set. It will ensure that
 # the data are shuffled before splitting the data.
 
-# %% {"deletable": true, "editable": true}
+# %%
 from sklearn.model_selection import train_test_split
 
 data_train, data_test, target_train, target_test = train_test_split(
@@ -119,7 +118,7 @@ print(
 #
 # In addition, we checking the time required to train the model and internally
 # check the number of iterations done by the solver to find a solution.
-# %% {"deletable": true, "editable": true}
+# %%
 from sklearn.svm import LinearSVR
 
 model = LinearSVR()
@@ -139,7 +138,7 @@ print(
 # follow the (bad) advice given in the warning message and increase the maximum
 # number of iterations allowed.
 
-# %% {"deletable": true, "editable": true}
+# %%
 model = LinearSVR(max_iter=50000)
 start = time.time()
 model.fit(data_train, target_train)
@@ -163,7 +162,7 @@ print(
 #
 # In our case, we will standardize the data and then train a linear SVR.
 
-# %% {"deletable": true, "editable": true}
+# %%
 from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import make_pipeline
 
@@ -197,7 +196,7 @@ print(
 # cross-validation strategies, `cross_val_score` takes a parameter `cv` which
 # defines the splitting strategy.
 
-# %% {"deletable": true, "editable": true}
+# %%
 from sklearn.model_selection import cross_val_score
 
 score = cross_val_score(model, data_numeric, target, cv=5)
@@ -228,7 +227,7 @@ print(f"The different scores obtained are: \n{score}")
 # encode categorical data into numerical data which can be used by a
 # machine-learning algorithm.
 
-# %% {"deletable": true, "editable": true}
+# %%
 categorical_columns = [
     'SOUTH', 'SEX', 'UNION', 'RACE', 'OCCUPATION', 'SECTOR', 'MARR'
 ]
@@ -241,7 +240,7 @@ print(data_categorical.head())
 # The most intuitive strategy is to encode each category by a numerical value.
 # The `OrdinalEncoder` will transform the data in such manner.
 
-# %% {"deletable": true, "editable": true}
+# %%
 from sklearn.preprocessing import OrdinalEncoder
 
 print(data_categorical.head())
@@ -271,7 +270,7 @@ print(data_encoded[:5])
 # the column corresponding to the category will be set to `1` while the other
 # columns will be set to `0`.
 
-# %% {"deletable": true, "editable": true}
+# %%
 from sklearn.preprocessing import OneHotEncoder
 
 print(data_categorical.head())
@@ -291,7 +290,7 @@ print(data_encoded[:5])
 # linear classifier on the encoded data and check the performance of this
 # machine learning pipeline using cross-validation.
 
-# %% {"deletable": true, "editable": true}
+# %%
 model = make_pipeline(OneHotEncoder(handle_unknown='ignore'), LinearSVR())
 score = cross_val_score(model, data_categorical, target)
 print(f"The R2 score is: {score.mean():.2f} +/- {score.std():.2f}")
@@ -319,7 +318,7 @@ print(f"The different scores obtained are: \n{score}")
 # * scaling: it will corresponds to the numerical features which will be
 #   standardized.
 
-# %% {"deletable": true, "editable": true}
+# %%
 binary_encoding_columns = ['MARR', 'SEX', 'SOUTH', 'UNION']
 one_hot_encoding_columns = ['OCCUPATION', 'SECTOR', 'RACE']
 scaling_columns = ['AGE', 'EDUCATION', 'EXPERIENCE']
@@ -330,7 +329,7 @@ scaling_columns = ['AGE', 'EDUCATION', 'EXPERIENCE']
 # "preprocessor" in a machine learning pipeline by adding a machine learning
 # model (e.g. a linear model) after the preprocessing.
 
-# %% {"deletable": true, "editable": true}
+# %%
 from sklearn.compose import ColumnTransformer
 from sklearn.linear_model import RidgeCV
 
