@@ -23,7 +23,7 @@
 # * the way to encode categorical variables;
 # * combine different preprocessing on different type of data;
 # * evaluate the performance of a model via cross-validation.
-# %% [markdown]
+#
 # ## Introduce the dataset
 #
 # To this aim, we will use data from the 1985 "Current Population Survey"
