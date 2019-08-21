@@ -20,8 +20,8 @@
 import os
 import pandas as pd
 
-df = pd.read_csv(os.path.join('datasets', 'cps_85_wages.csv'))
-target_name = "WAGE"
+df = pd.read_csv(os.path.join('datasets', 'adult-census.csv'))
+target_name = "class"
 target = df[target_name].to_numpy()
 data = df.drop(columns=target_name)
 
@@ -45,9 +45,12 @@ from sklearn.preprocessing import OrdinalEncoder
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.preprocessing import StandardScaler
 
-binary_encoding_columns = ['MARR', 'SEX', 'SOUTH', 'UNION']
-one_hot_encoding_columns = ['OCCUPATION', 'SECTOR', 'RACE']
-scaling_columns = ['AGE', 'EDUCATION', 'EXPERIENCE']
+binary_encoding_columns = ['sex']
+one_hot_encoding_columns = ['workclass', 'education', 'marital-status',
+                            'occupation', 'relationship', 'race',
+                            'native-country']
+scaling_columns = ['age', 'capital-gain', 'capital-loss', 'hours-per-week',
+                   'education-num']
 
 preprocessor = ColumnTransformer([
     ('binary-encoder', OrdinalEncoder(), binary_encoding_columns),
@@ -61,10 +64,10 @@ preprocessor = ColumnTransformer([
 # to predict wages.
 
 # %%
-from sklearn.linear_model import Ridge
+from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import make_pipeline
 
-model = make_pipeline(preprocessor, Ridge())
+model = make_pipeline(preprocessor, LogisticRegression(max_iter=1000))
 model.fit(df_train, target_train)
 print(
     f"The R2 score using a {model.__class__.__name__} is "
@@ -87,20 +90,20 @@ print(
 # impact of this parameter on the model performance.
 
 # %%
-alpha = 1
-model = make_pipeline(preprocessor, Ridge(alpha=alpha))
+C = 1
+model = make_pipeline(preprocessor, LogisticRegression(C=C, max_iter=1000))
 model.fit(df_train, target_train)
 print(
     f"The R2 score using a {model.__class__.__name__} is "
-    f"{model.score(df_test, target_test):.2f} with alpha={alpha}"
+    f"{model.score(df_test, target_test):.2f} with alpha={C}"
 )
 
-alpha = 10000
-model = make_pipeline(preprocessor, Ridge(alpha=alpha))
+C = 1e-5
+model = make_pipeline(preprocessor, LogisticRegression(C=C, max_iter=1000))
 model.fit(df_train, target_train)
 print(
     f"The R2 score using a {model.__class__.__name__} is "
-    f"{model.score(df_test, target_test):.2f}  with alpha={alpha}"
+    f"{model.score(df_test, target_test):.2f} with alpha={C}"
 )
 
 # %% [markdown]
@@ -118,7 +121,7 @@ print(
 # %%
 from sklearn.model_selection import GridSearchCV
 
-model = make_pipeline(preprocessor, Ridge())
+model = make_pipeline(preprocessor, LogisticRegression(max_iter=1000))
 
 # %% [markdown]
 # We will see that we need to provide the name of the parameter to be set.
@@ -137,7 +140,7 @@ print(model.get_params())
 # %%
 import numpy as np
 
-param_grid = {'ridge__alpha': np.linspace(0.001, 1000, num=20)}
+param_grid = {'logisticregression__C': np.linspace(1e-5, 1, num=5)}
 model_grid_search = GridSearchCV(model, param_grid=param_grid)
 model_grid_search.fit(df_train, target_train)
 print(
@@ -154,7 +157,7 @@ print(
 # `best_params_`
 
 # %%
-print(f"The best set of parameters is: {model_grid_search.best_params_:.1f}")
+print(f"The best set of parameters is: {model_grid_search.best_params_}")
 
 # %% [markdown]
 # The parameters during the grid-search need to be specificy. Instead, one
@@ -167,16 +170,16 @@ print(f"The best set of parameters is: {model_grid_search.best_params_:.1f}")
 from scipy.stats import uniform
 from sklearn.model_selection import RandomizedSearchCV
 
-param_distributions = {'ridge__alpha': uniform(loc=50, scale=100)}
+param_distributions = {'logisticregression__C': uniform(loc=50, scale=100)}
 model_grid_search = RandomizedSearchCV(
-    model, param_distributions=param_distributions, n_iter=20
+    model, param_distributions=param_distributions, n_iter=5
 )
 model_grid_search.fit(df_train, target_train)
 print(
     f"The R2 score using a {model_grid_search.__class__.__name__} is "
     f"{model_grid_search.score(df_test, target_test):.2f}"
 )
-print(f"The best set of parameters is: {model_grid_search.best_params_:.1f}")
+print(f"The best set of parameters is: {model_grid_search.best_params_}")
 
 # %% [markdown]
 # ## Notes on search efficiency
@@ -189,23 +192,26 @@ print(f"The best set of parameters is: {model_grid_search.best_params_:.1f}")
 
 # %%
 import time
-from sklearn.linear_model import RidgeCV
+from sklearn.linear_model import LogisticRegressionCV
 
 # define the different alphas to try out
-param_grid = {"alpha": (0.1, 1.0, 10.0)}
+param_grid = {"C": (0.1, 1.0, 10.0)}
 
-model = make_pipeline(preprocessor, RidgeCV(alphas=param_grid['alpha']))
+model = make_pipeline(preprocessor, LogisticRegressionCV(Cs=param_grid['C'],
+                                                         max_iter=1000))
 start = time.time()
 model.fit(df_train, target_train)
-print(f"Time elapsed to train RidgeCV: {time.time() - start:.3f} seconds")
+print(f"Time elapsed to train LogisticRegressionCV: "
+      f"{time.time() - start:.3f} seconds")
 
 model = make_pipeline(
-    preprocessor, GridSearchCV(Ridge(), param_grid=param_grid)
+    preprocessor, GridSearchCV(LogisticRegression(max_iter=1000),
+                               param_grid=param_grid)
 )
 start = time.time()
 model.fit(df_train, target_train)
-print(f"Time elapsed to make a grid-search on Ridge: {time.time() - start:.3f} "
-      f"seconds")
+print(f"Time elapsed to make a grid-search on LogisticRegression: "
+      f"{time.time() - start:.3f} seconds")
 
 # %% [markdown]
 # ## Combining evaluation and hyper-parameters search
