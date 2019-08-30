@@ -12,11 +12,6 @@
 # * how to tune these hyper-parameters;
 # * how to evaluate the model performance together with hyper-parameters
 #   tuning.
-#
-# ## Recall of a basic preprocessing and predictive model fitting
-#
-# In the previous notebook, we show how to build a predictive model containing
-# a preprocessing step to deal with heterogeneous data.
 
 # %%
 import os
@@ -119,9 +114,8 @@ print(
 # ## Finding the best model hyper-parameters via exhaustive parameters search
 #
 # We see that the parameter `C` as a significative impact on the model
-# performance. Finding the best value for this parameter is crucial.
-# However, this parameter should be tuned with cross-validation, avoinding
-# over-fitting risks.
+# performance. This parameter should be tuned to get the best cross-validation
+# score, so as to avoid over-fitting problems.
 #
 # In short, we will set the parameter, train our model on some data, and
 # evaluate the model performance on some left out data. Ideally, we will select
