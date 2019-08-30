@@ -281,6 +281,7 @@ defines the splitting strategy.
 
 
 
+
 ```python
 from sklearn.model_selection import cross_val_score
 
@@ -345,6 +346,7 @@ data_categorical.head()
 
 The most intuitive strategy is to encode each category by a numerical value.
 The `OrdinalEncoder` will transform the data in such manner.
+
 
 
 
@@ -448,6 +450,7 @@ of the encoder:
 
 
 
+
 ## Combining different transformers used for different column types
 
 In the previous sections, we saw that we need to treat data specifically
@@ -467,6 +470,7 @@ We can first define the columns depending on their data type:
   two possible categories. This encoding will create one additional column for
   each possible categorical value.
 * **numerical scaling** numerical features which will be standardized.
+
 
 
 
@@ -579,6 +583,7 @@ number of samples and limited number of informative features (e.g. less than
 
 This explains why Gradient Boosted Machines are very popular among datascience
 practitioners who work with tabular data.
+
 
 
 
