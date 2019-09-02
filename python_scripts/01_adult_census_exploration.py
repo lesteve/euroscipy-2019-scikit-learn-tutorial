@@ -119,8 +119,7 @@ adult_census.hist(figsize=(20, 10));
 # %% [markdown]
 # We can already make a few comments about some of the variables:
 # * age: there are not that many points for 'age > 70'. The dataset description
-# does indicate that retired people have been filtered out (`hours-per-week >
-# 0`).
+# does indicate that retired people have been filtered out (`hours-per-week > 0`).
 # * education-num: peak at 10 and 13, hard to tell what it corresponds to
 # without looking much further. We'll do that later in this notebook.
 # * hours per week at 40, this was very likely the standard of working hours at
@@ -185,7 +184,7 @@ sns.pairplot(data=adult_census[:n_samples_to_plot], x_vars='age', y_vars='hours-
 # * if you are old (more than 70 year-old roughly), you are in the `<= 50K` class.
 # * if you work part-time (less than 40 hours roughly) you are in the `<= 50K` class.
 #
-# These hand-writen rules could work reasonably well without the need for any
+# These hand-written rules could work reasonably well without the need for any
 # machine learning. Note however that it is not very easy to create rules for
 # the region `40 < hours-per-week < 60` and `30 < age < 70`. We can hope that
 # machine learning can help in this region. Also note that visualization can
@@ -200,6 +199,53 @@ sns.pairplot(data=adult_census[:n_samples_to_plot], x_vars='age', y_vars='hours-
 # this may be a factor when deciding which model to chose.
 
 
+# %%
+def plot_tree_decision_function(tree, X, y, ax):
+    import numpy as np
+    from scipy import ndimage
+
+    h = 0.02
+    x_min, x_max = X.iloc[:, 0].min() - .5, X.iloc[:, 0].max() + .5
+    y_min, y_max = X.iloc[:, 1].min() - .5, X.iloc[:, 1].max() + .5
+    xx, yy = np.meshgrid(np.arange(x_min, x_max, h),
+                         np.arange(y_min, y_max, h))
+
+    Z = tree.predict_proba(np.c_[xx.ravel(), yy.ravel()])[:, 1]
+    Z = Z.reshape(xx.shape)
+    faces = tree.tree_.apply(
+        np.c_[xx.ravel(), yy.ravel()].astype(np.float32)
+    )
+    faces = faces.reshape(xx.shape)
+    border = ndimage.laplace(faces) != 0
+    ax.scatter(
+        X.iloc[:, 0], X.iloc[:, 1], c=np.array(['tab:blue', 'tab:red'])[y],
+        s=60, alpha=0.7
+    )
+    ax.contourf(xx, yy, Z, alpha=.4, cmap='RdBu_r')
+    ax.scatter(xx[border], yy[border], marker='.', s=1)
+    ax.set_xlabel(X.columns[0])
+    ax.set_ylabel(X.columns[1])
+
+
+# %%
+import matplotlib.pyplot as plt
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.tree import plot_tree
+from sklearn.preprocessing import LabelEncoder
+
+data_subset = adult_census[:n_samples_to_plot]
+X = data_subset[["age", "hours-per-week"]]
+y = LabelEncoder().fit_transform(
+    data_subset[target_column].to_numpy()
+)
+
+max_depth = 2
+tree = DecisionTreeClassifier(max_depth=max_depth, random_state=0)
+tree.fit(X, y)
+fig, ax = plt.subplots()
+plot_tree(tree, ax=ax)
+fig, ax = plt.subplots()
+plot_tree_decision_function(tree, X, y, ax=ax)
 # %% [markdown]
 #
 # In this notebook we have:
@@ -209,3 +255,6 @@ sns.pairplot(data=adult_census[:n_samples_to_plot], x_vars='age', y_vars='hours-
 # * inspected the data with `pandas`, `seaborn` and `pandas_profiling`. Data inspection
 #   can allow you to decide whether using machine learning is appropriate for
 #   your data and to notice potential peculiarities in your data.
+
+
+# %%
